@@ -1,0 +1,400 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyM+4DPadCGZE2kCBnEY8/H+",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/giuFSilva/ImersaoPythonAlura/blob/main/Analises%20de%20base%20B3%20\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 8,
+      "metadata": {
+        "id": "nNTNuwDi_VXU"
+      },
+      "outputs": [],
+      "source": [
+        "import pandas as pd\n",
+        "import plotly.express as px"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "pd.options.display.float_format = \"{:.2f}\".format"
+      ],
+      "metadata": {
+        "id": "e-4WMXo1_ZeT"
+      },
+      "execution_count": 9,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal = pd.read_excel(\"acoes_pura.xlsx\", sheet_name=\"Principal\")\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "5WN6dAnd_baD"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_totalacoes = pd.read_excel(\"acoes_pura.xlsx\", sheet_name=\"Total_de_acoes\")\n",
+        "df_totalacoes"
+      ],
+      "metadata": {
+        "id": "LcKGOr8p_c4c"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_ticker = pd.read_excel(\"acoes_pura.xlsx\", sheet_name=\"Ticker\")\n",
+        "df_ticker"
+      ],
+      "metadata": {
+        "id": "7ncaqyLC_eLD"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_chatgpt = pd.read_excel(\"acoes_pura.xlsx\", sheet_name=\"ChatGPT\")\n",
+        "df_chatgpt"
+      ],
+      "metadata": {
+        "id": "8-uAfX0e_fya"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal = df_principal[[\"Ativo\", \"Data\", \"Último (R$)\", \"Var. Dia (%)\"]].copy()\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "1SWNwr0C_hsG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal = df_principal.rename(columns={\"Último (R$)\" : \"valor_final\", \"Var. Dia (%)\" : \"var_dia_pct\"}).copy()\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "4tGPQK___i12"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal[\"var_pct\"] = df_principal[\"var_dia_pct\"]/100\n",
+        "df_principal[\"valor_inicial\"] = df_principal[\"valor_final\"]/(1 + df_principal[\"var_pct\"])\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "pb5tx-_7_kTx"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal = df_principal.merge(df_totalacoes, left_on=\"Ativo\", right_on=\"Código\", how=\"left\")\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "BSsWXzwu_l3j"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal = df_principal.drop(columns={\"Código\"})\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "hSPJmThE_sJy"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal[\"variacao_rs\"] = (df_principal[\"valor_final\"]-df_principal[\"valor_inicial\"]) * df_principal[\"Qtde. Teórica\"]\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "0fvwH4PC_uuE"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal[\"Qtde. Teórica\"] = df_principal[\"Qtde. Teórica\"].astype(int)\n",
+        "df_principal = df_principal.rename(columns={\"Qtde. Teórica\" : \"qtd_teorica\"}).copy()\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "sCJA0a_2_wA7"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal['resultado'] = df_principal['variacao_rs'].apply(lambda x: \"Subiu\" if x > 0 else (\"Desceu\" if x < 0 else \"Estável\"))\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "gaulrRX__xnq"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal = df_principal.merge(df_ticker, left_on=\"Ativo\", right_on=\"Ticker\", how=\"left\")\n",
+        "df_principal = df_principal.drop(columns=[\"Ticker\"])\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "Z9kmj1gN_zWL"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_chatgpt = df_chatgpt.rename(columns={\"Nome\":\"nome_empresa\"}).copy()\n",
+        "df_chatgpt"
+      ],
+      "metadata": {
+        "id": "6q4h7efn_0vc"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal = df_principal.merge(df_chatgpt, left_on=\"Nome\", right_on=\"Empresa\", how=\"left\")\n",
+        "df_principal = df_principal.drop(columns=[\"Empresa\"])\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "pFU1DOKJ_2PD"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal\n"
+      ],
+      "metadata": {
+        "id": "_zR_4SDlAmze"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal['Idade (anos)'] = pd.to_numeric(df_principal['Idade (anos)'], errors='coerce').astype('Int64')\n",
+        "#Convertendo o idade"
+      ],
+      "metadata": {
+        "id": "nZ3m6lvJBUkO"
+      },
+      "execution_count": 34,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal['Idade (anos)'] = pd.to_numeric(df_principal['Idade (anos)'], errors='coerce')\n",
+        "#Convertendo o idade"
+      ],
+      "metadata": {
+        "id": "FJMpaXoeBodr"
+      },
+      "execution_count": 36,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal['cat_idade'] = df_principal['Idade (anos)'].apply(lambda x: \"Mais de 100 anos\" if pd.notna(x) and x > 100 else (\"Menos de 50 anos\" if pd.notna(x) and x < 50 else \"Entre 50 e 100 anos\"))\n",
+        "#"
+      ],
+      "metadata": {
+        "id": "YSotTKLMBsJZ"
+      },
+      "execution_count": 37,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal['Idade (anos)'].fillna(-1, inplace=True)  # Substituindo NaN por -1\n"
+      ],
+      "metadata": {
+        "id": "up9NiUtkCWwN"
+      },
+      "execution_count": 41,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal['cat_idade'] = df_principal['Idade (anos)'].apply(lambda x: \"Mais de 100 anos\" if x > 100 else (\"Menos de 50 anos\" if x < 50 else \"Entre 50 e 100 anos\"))\n",
+        "df_principal"
+      ],
+      "metadata": {
+        "id": "AWyiotEG_33D"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal.head(2)"
+      ],
+      "metadata": {
+        "id": "VM08NNvSDVSe"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Calculando a maior variação e a respectiva empresa\n",
+        "maior_variacao = df_principal.loc[df_principal['variacao_rs'].idxmax()]\n",
+        "maior_variacao_valor = maior_variacao['variacao_rs']\n",
+        "maior_variacao_empresa = maior_variacao['resultado']\n",
+        "\n",
+        "# Calculando a menor variação e a respectiva empresa\n",
+        "menor_variacao = df_principal.loc[df_principal['variacao_rs'].idxmin()]\n",
+        "menor_variacao_valor = menor_variacao['variacao_rs']\n",
+        "menor_variacao_empresa = menor_variacao['resultado']\n",
+        "\n",
+        "# Calculando a média da variação\n",
+        "media_variacao = df_principal['variacao_rs'].mean()\n",
+        "\n",
+        "# Calculando a média da variação para aqueles que subiram\n",
+        "media_subiu = df_principal[df_principal['resultado'] == 'Subiu']['variacao_rs'].mean()\n",
+        "\n",
+        "# Calculando a média da variação para aqueles que desceram\n",
+        "media_desceu = df_principal[df_principal['resultado'] == 'Desceu']['variacao_rs'].mean()\n",
+        "\n",
+        "print(\"Maior variação\\t\", maior_variacao_valor, \"\\t\", maior_variacao_empresa)\n",
+        "print(\"Menor variação\\t\", menor_variacao_valor, \"\\t\", menor_variacao_empresa)\n",
+        "print(\"Média variação\\t\", media_variacao)\n",
+        "print(\"Média de quem subiu\\t\", media_subiu)\n",
+        "print(\"Média de quem desceu\\t\", media_desceu)"
+      ],
+      "metadata": {
+        "id": "3oTscZbNDxLB"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal_subiu = df_principal[df_principal[\"resultado\"] == \"Subiu\"]\n",
+        "df_principal_subiu"
+      ],
+      "metadata": {
+        "id": "ttOOytpCEhJ6"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_principal_segmento = df_principal_subiu.groupby(\"Segmento\")[\"variacao_rs\"].sum().reset_index()\n",
+        "df_principal_segmento"
+      ],
+      "metadata": {
+        "id": "sfOpUl00E_ri"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_analise_saldo = df_principal.groupby(\"resultado\")[\"variacao_rs\"].sum().reset_index()\n",
+        "df_analise_saldo"
+      ],
+      "metadata": {
+        "id": "eN5r-fn9Fv4c"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "fig = px.bar(df_analise_saldo, x = \"resultado\", y = \"variacao_rs\", text = \"variacao_rs\", title = \"Variação em reais por resultado\")\n",
+        "fig.show()"
+      ],
+      "metadata": {
+        "id": "tNGfvdSeF9AF"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
